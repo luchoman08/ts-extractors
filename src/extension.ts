@@ -2,8 +2,7 @@
 
 import { extractAbstract } from "./extract-abstract";
 
-
-export function ekstrak2() {
+export function ekstrak2(){
     if (!vscode.window.activeTextEditor) {
         vscode.window.showInformationMessage('Open a file first to manipulate text selections');
         return;
@@ -14,22 +13,35 @@ export function ekstrak2() {
     const description = "Extract Abstract class from Interface";
     items.push({ label: "Extract Abstract class", description });
 
-    return vscode.window.showQuickPick(items).then((selection) => {
+    return vscode.window.showQuickPick(items).then(selection => {
         if (!selection) {
             return;
         }
 
         const editor = vscode.window.activeTextEditor;
+        if ( typeof editor === "undefined" ) {
+            vscode.window.showInformationMessage('Editor is undefined');
+            return  new Promise<string>((resolve) => {
+                resolve('Editor is undefined');
+            });;
+        }
         const selections = editor.selections;
         const text = editor.document.getText(selections[0])
 
         return extractAbstract(text);
-    })
+
+    });
+        
 }
 
 export function ekstrak() {
+    
     var editor = vscode.window.activeTextEditor;
-    const { document } = editor;
+    if ( typeof editor === "undefined" ) {
+        vscode.window.showInformationMessage('Editor is undefined');
+        return 0;
+    }
+    const  document  = editor.document;
   
     const selectionLine = editor.selection.end.line;
     
@@ -37,12 +49,19 @@ export function ekstrak() {
     const lastLine = document.lineAt(selectionLine);
 
     const edit = new vscode.WorkspaceEdit();
-
-    ekstrak2().then(res => {
-        console.log(res)
-        edit.insert(document.uri, lastLine.range.end, res);
+    let response = ekstrak2();
+    if ( typeof response === 'undefined' ) {
+        return 0;
+    }
+    response.then( res  => {
+        if ( typeof res === 'undefined' ) {
+            return false;
+        }
+        console.log(res);
+        edit.insert(document.uri, lastLine.range.end, res as any);
+        vscode.window.showInformationMessage('Abstract class created');
         return vscode.workspace.applyEdit(edit)
-    })
+    });
 
 
 }
@@ -71,7 +90,6 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Display a message box to the user
         ekstrak();
-        vscode.window.showInformationMessage('Abstract class created');
     });
 
     context.subscriptions.push(disposable);
