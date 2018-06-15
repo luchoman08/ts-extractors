@@ -5,13 +5,24 @@ const parser = new typescriptParser.TypescriptParser();
  * 
  * @param {string} sourceString 
  */
-export async function extractAbstract( source: string ) {
+function getDefaultValue(type: string): string  {
+    switch( type ) {
+        case 'string': return "''";
+        case 'number': return "-12";
+        case 'array': return "[]"; 
+        default: return 'Object';
+    }
+}
+export async function extractAbstract( source: string ) : Promise<string> {
     const parsed = await parser.parseSource(source);
 
-    const classDeclaration = parsed.declarations.filter(declaration => declaration instanceof typescriptParser.ClassDeclaration)[0];
+    const classDeclaration = parsed.declarations.filter((declaration : any) => declaration instanceof typescriptParser.ClassDeclaration)[0];
     let className: string = classDeclaration.name;
+    let classPrefix: string = '';
     if ( className.indexOf('Interface') !== -1) {
-        className = className.replace('Interface', '');
+        classPrefix = className.replace('Interface', '');
+    } else {
+        classPrefix = className;
     }
     //const classMethods = classDeclaration.methods;
     let classProperties = classDeclaration.properties;
@@ -20,15 +31,22 @@ export async function extractAbstract( source: string ) {
  * Class propertie:
  * object (name:string, type: string, start: number, end: number)
  */
-    let pretty = classProperties.map(
+    let prettyObjectProperties = classProperties.map(
         (property: {name: string, type: string, start: number, end: number} )=> {
-            return property.name + ' : ' + 'any'
+            return property.name + ' : ' + getDefaultValue(property.type)
         }
-    )
-
-    const res = `export abstract class ${className}Abstract {
-    ${pretty.join(";\n    ").concat(";")}
+    );
+    let prettyAbstractProperties = classProperties.map(
+        (property: {name: string, type: string, start: number, end: number} )=> {
+            return property.name + ' : any' 
+        }
+    );
+    const abstractClass: string = "\n" +`export abstract class ${classPrefix}Abstract {
+    ${prettyAbstractProperties.join(";\n    ").concat(";")}
     }`.trim();
-
-    return res;
+    const defaultObject = `export const ${classPrefix.toLowerCase()}DefaultObject: ${className} = {
+        ${prettyObjectProperties.join(",\n    ")}
+        };`.trim();
+        console.log(defaultObject);
+    return abstractClass.concat("\n",  defaultObject);
 }
