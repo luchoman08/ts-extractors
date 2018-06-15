@@ -1,7 +1,9 @@
 'use strict';
 
 import { extractAbstract } from "./extract-abstract";
-
+// The module 'vscode' contains the VS Code extensibility API
+// Import the module and reference it with the alias vscode in your code below
+import * as vscode from 'vscode';
 export function ekstrak2(){
     if (!vscode.window.activeTextEditor) {
         vscode.window.showInformationMessage('Open a file first to manipulate text selections');
@@ -12,7 +14,7 @@ export function ekstrak2(){
 
     const description = "Extract Abstract class from Interface";
     items.push({ label: "Extract Abstract class", description });
-
+    items.push({ label: "asdf", description: "fdsa" });
     return vscode.window.showQuickPick(items).then(selection => {
         if (!selection) {
             return;
@@ -58,7 +60,7 @@ export function ekstrak() {
             return false;
         }
         console.log(res);
-        edit.insert(document.uri, lastLine.range.end, res as any);
+        edit.insert(document.uri, lastLine.range.end, res as any );
         vscode.window.showInformationMessage('Abstract class created');
         return vscode.workspace.applyEdit(edit)
     });
@@ -70,9 +72,7 @@ export function ekstrak() {
 ///
 
 
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
