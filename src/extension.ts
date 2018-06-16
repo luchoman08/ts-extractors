@@ -14,7 +14,6 @@ export function ekstrak2(){
 
     const description = "Extract Abstract class from Interface";
     items.push({ label: "Extract Abstract class", description });
-    items.push({ label: "asdf", description: "fdsa" });
     return vscode.window.showQuickPick(items).then(selection => {
         if (!selection) {
             return;
