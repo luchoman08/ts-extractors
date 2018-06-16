@@ -4,7 +4,7 @@ import { extractAbstract } from "./extract-abstract";
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-export function ekstrak2(){
+export function bindMenuToFunctions(){
     if (!vscode.window.activeTextEditor) {
         vscode.window.showInformationMessage('Open a file first to manipulate text selections');
         return;
@@ -35,7 +35,7 @@ export function ekstrak2(){
         
 }
 
-export function ekstrak() {
+export function bindExtensionToEditor() {
     
     var editor = vscode.window.activeTextEditor;
     if ( typeof editor === "undefined" ) {
@@ -50,7 +50,7 @@ export function ekstrak() {
     const lastLine = document.lineAt(selectionLine);
 
     const edit = new vscode.WorkspaceEdit();
-    let response = ekstrak2();
+    let response = bindMenuToFunctions();
     if ( typeof response === 'undefined' ) {
         return 0;
     }
@@ -66,10 +66,6 @@ export function ekstrak() {
 
 
 }
-
-
-///
-
 
 
 
@@ -88,7 +84,7 @@ export function activate(context: vscode.ExtensionContext) {
         // The code you place here will be executed every time your command is executed
 
         // Display a message box to the user
-        ekstrak();
+        bindExtensionToEditor();
     });
 
     context.subscriptions.push(disposable);
