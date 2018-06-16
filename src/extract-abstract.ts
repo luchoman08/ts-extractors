@@ -21,12 +21,17 @@ function getDefaultValue(type: string): string  {
     }
 }
 
-function getDeclaration(atributeName: string, atributeType: string, atributeinitialize?: boolean ) {
-    return `${atributeName}: ${atributeType} = new ${atributeType}() `;
+function getDeclaration(atributeName: string, atributeType: string ) {
+    return `${atributeName}: ${atributeType} = new ${atributeType}(); `;
 }
 
-function makeFunction(functionName: string, inputName: string, outputType: string, inputType: string, content: string): string {
-    return `${functionName}(${inputName}: ${inputType}): ${outputType} { 
+function makeFunction(
+    functionName: string, 
+    inputName: string, 
+    outputType: string, 
+    inputType: string, 
+    content: string): string {
+    return `${functionName}(${inputName}: ${inputType}): ${outputType} {
         ${content} }`;
 }
 
@@ -47,40 +52,42 @@ function getInstanceName( className: string ): string {
     return className[0].toLowerCase() + className.slice(1, className.length);
 }
 
+function getClassExtends( className: string, baseClass: string): string {
+    return `export class ${className} extends ${baseClass} {}`;
+}
+function getInterfaceExtends( interfaceName: string, baseClass: string): string {
+    return `export interface ${interfaceName} extends ${baseClass} {}`;
+}
 export async function extractAbstract( source: string ) : Promise<string> {
     const parsed = await parser.parseSource(source);
-    
     const classDeclaration = parsed.declarations[0];
     let className: string = classDeclaration.name;
     let classPrefix: string = '';
-    if ( className.indexOf('Interface') !== -1) {
-        classPrefix = className.replace('Interface', '');
+    if ( className.indexOf('Abstract') !== -1) {
+        classPrefix = className.replace('Abstract', '');
     } else {
         classPrefix = className;
     }
-    //const classMethods = classDeclaration.methods;
+    let defaultObjectName = `${getInstanceName(classPrefix)}DefaultObject`;
+    let newObjectName = getInstanceName(classPrefix);
+    let sourceObjectName = getInstanceName(className);
+    let interfaceName: string =  classPrefix + 'Interface';
     let classProperties: ClassPropertyInterface[] = classDeclaration.properties;
-    console.log(classDeclaration.properties);
-/**
- * Class propertie:
- * object (name:string, type: string, start: number, end: number)
- */
     let prettyObjectProperties = classProperties.map(
         (property: {name: string, type: string, start: number, end: number} )=> {
             return property.name + ' : ' + getDefaultValue(property.type)
         }
     );
-    let defaultObjectName = `${getInstanceName(classPrefix)}DefaultObject`;
-    let newObjectName = getInstanceName(classPrefix);
-    let sourceObjectName = getInstanceName(className);
     let prettyAssignments = prettyAttributeInit(classProperties, newObjectName,  sourceObjectName, defaultObjectName);
     let funct = "\n" + makeFunction('make', sourceObjectName, classPrefix, className , prettyAssignments  ) + "\n" ;
     const factory: string = "\n" +`export class ${classPrefix}Factory {
+        ${getDeclaration(newObjectName, classPrefix)}
     ${funct}
     }`.trim();
-    const defaultObject = `export const ${defaultObjectName}: ${className} = {
+    let interfaceDefinition: string = getInterfaceExtends(interfaceName, className);
+    let classDefinition: string = getClassExtends(classPrefix, className);
+    const defaultObject = `export const ${defaultObjectName}: ${interfaceName} = {
         ${prettyObjectProperties.join(",\n    ")}
         };`.trim();
-        console.log(defaultObject);
-    return defaultObject.concat("\n",  factory);
+    return defaultObject.concat("\n", interfaceDefinition, "\n", classDefinition, "\n", factory);
 }
