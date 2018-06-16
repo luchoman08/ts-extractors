@@ -22,7 +22,7 @@
         "commands": [
             {
                 "command": "extension.extract",
-                "title": "Extractors"
+                "title": "Typescript extractors"
             }
         ]
     },

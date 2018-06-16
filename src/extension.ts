@@ -12,8 +12,8 @@ export function bindMenuToFunctions(){
 
     let items = [];
 
-    const description = "Extract Abstract class from Interface";
-    items.push({ label: "Extract Abstract class", description });
+    const description = "Extract factory, interface, default object and class from abstract class";
+    items.push({ label: "Extract all", description });
     return vscode.window.showQuickPick(items).then(selection => {
         if (!selection) {
             return;
@@ -60,7 +60,7 @@ export function bindExtensionToEditor() {
         }
         console.log(res);
         edit.insert(document.uri, lastLine.range.end, res as any );
-        vscode.window.showInformationMessage('Abstract class created');
+        vscode.window.showInformationMessage('All extractors has been executed correctly');
         return vscode.workspace.applyEdit(edit)
     });
 
@@ -75,7 +75,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
-    console.log('Extension "Extract abstract class" is loaded');
+    console.log('Extension "Extractors Ts" is loaded');
 
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with  registerCommand
