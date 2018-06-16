@@ -22,7 +22,7 @@ function getDefaultValue(type: string): string  {
 }
 
 function getDeclaration(atributeName: string, atributeType: string ) {
-    return `${atributeName}: ${atributeType} = new ${atributeType}(); `;
+    return `let ${atributeName}: ${atributeType} = new ${atributeType}(); `;
 }
 
 function makeFunction(
@@ -30,9 +30,12 @@ function makeFunction(
     inputName: string, 
     outputType: string, 
     inputType: string, 
-    content: string): string {
+    content: string,
+    newObjectName: string): string {
     return `${functionName}(${inputName}: ${inputType}): ${outputType} {
-        ${content} }`;
+        ${getDeclaration(newObjectName, outputType)}
+        ${content} 
+        ${getReturn(newObjectName)}}`;
 }
 
 function prettyAttributeInit(
@@ -50,6 +53,10 @@ function prettyAttributeInit(
 
 function getInstanceName( className: string ): string {
     return className[0].toLowerCase() + className.slice(1, className.length);
+}
+
+function getReturn( objectName: string ): string {
+    return `return ${objectName}`;
 }
 
 function getClassExtends( className: string, baseClass: string): string {
@@ -79,9 +86,8 @@ export async function extractAbstract( source: string ) : Promise<string> {
         }
     );
     let prettyAssignments = prettyAttributeInit(classProperties, newObjectName,  sourceObjectName, defaultObjectName);
-    let funct = "\n" + makeFunction('make', sourceObjectName, classPrefix, className , prettyAssignments  ) + "\n" ;
+    let funct = "\n" + makeFunction('make', sourceObjectName, classPrefix, className , prettyAssignments, newObjectName  ) + "\n" ;
     const factory: string = "\n" +`export class ${classPrefix}Factory {
-        ${getDeclaration(newObjectName, classPrefix)}
     ${funct}
     }`.trim();
     let interfaceDefinition: string = getInterfaceExtends(interfaceName, className);
