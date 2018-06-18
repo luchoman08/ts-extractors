@@ -21,8 +21,8 @@ function getDefaultValue(type: string): string  {
     }
 }
 
-function getDeclaration(atributeName: string, atributeType: string ) {
-    return `let ${atributeName}: ${atributeType} = new ${atributeType}(); `;
+function getDeclaration(atributeName: string, atributeType: string, classDeclaration?: boolean, initialVarAssignment?: string ) {
+    return `${!classDeclaration? 'let' : 'public'} ${atributeName}: ${atributeType} = ${!initialVarAssignment? `new ${atributeType}()`: initialVarAssignment}; `;
 }
 
 function makeFunction(
@@ -56,7 +56,7 @@ function getInstanceName( className: string ): string {
 }
 
 function getReturn( objectName: string ): string {
-    return `return ${objectName}`;
+    return `return ${objectName};`;
 }
 
 function getClassExtends( className: string, baseClass: string): string {
@@ -77,17 +77,18 @@ export async function extractAbstract( source: string ) : Promise<string> {
     }
     let defaultObjectName = `${getInstanceName(classPrefix)}DefaultObject`;
     let newObjectName = getInstanceName(classPrefix);
-    let sourceObjectName = getInstanceName(className);
     let interfaceName: string =  classPrefix + 'Interface';
+    let sourceObjectName = getInstanceName(interfaceName);
     let classProperties: ClassPropertyInterface[] = classDeclaration.properties;
     let prettyObjectProperties = classProperties.map(
         (property: {name: string, type: string, start: number, end: number} )=> {
             return property.name + ' : ' + getDefaultValue(property.type)
         }
     );
-    let prettyAssignments = prettyAttributeInit(classProperties, newObjectName,  sourceObjectName, defaultObjectName);
-    let funct = "\n" + makeFunction('make', sourceObjectName, classPrefix, className , prettyAssignments, newObjectName  ) + "\n" ;
+    let prettyAssignments = prettyAttributeInit(classProperties, newObjectName,  sourceObjectName, `this.${defaultObjectName}`);
+    let funct = "\n" + makeFunction('make', sourceObjectName, classPrefix, interfaceName , prettyAssignments, newObjectName  ) + "\n" ;
     const factory: string = "\n" +`export class ${classPrefix}Factory {
+    ${getDeclaration(defaultObjectName, interfaceName, true, defaultObjectName)}
     ${funct}
     }`.trim();
     let interfaceDefinition: string = getInterfaceExtends(interfaceName, className);
