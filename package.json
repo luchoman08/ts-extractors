@@ -2,7 +2,7 @@
     "name": "ts-extract-abstract",
     "displayName": "Ts extractors",
     "description": "Automatically generates an abstract class based on a class or interface",
-    "version": "0.1.1",
+    "version": "0.1.5",
     "publisher": "ismael",
     "repository": {
         "type": "git",
